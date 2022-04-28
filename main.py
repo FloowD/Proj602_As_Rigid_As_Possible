@@ -2,15 +2,21 @@
 import numpy as np
 from manipModel3D import *
 from manipAsRigidAsPossible import *
+import polyscope as ps
 
 if __name__ == '__main__':
     sommets, faces = openOffFile('./Data/armadillo_1k.off')
+    sommets2, faces2 = openOffFile('./Data/dino.off')
     # print(sommets, faces)
 
     Arap = ARAP(sommets, faces)
     Arap.genereCellules()
     # print(Arap.sommets)
     print(Arap.tabCellules)
+    ps.init()
+    ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=True)
+    ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
+    ps.show()
 
 """
 Les questions qu'on se pose :

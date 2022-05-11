@@ -11,12 +11,17 @@ if __name__ == '__main__':
 
     Arap = ARAP(sommets, faces)
     Arap.genereCellules()
+    # Arap.calculPoidsCellules()
+    Arap.initMatriceRotation()
+    print(Arap.matriceRotation)
     # print(Arap.sommets)
-    print(Arap.tabCellules)
-    ps.init()
-    ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=True)
-    ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
-    ps.show()
+    # print(Arap.tabPoidsCellules)
+    # test = Arap.chercheFaces(sommets[21], sommets[539])
+    # print(test)
+    # ps.init()
+    # ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=True)
+    # ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
+    # ps.show()
 
 """
 Les questions qu'on se pose :
@@ -87,10 +92,13 @@ L'énergie sert à :
 Récap des informations :
 
 !Étape du programme 
-    - Calcul des cellules (déjà codé)
-    - Calcul du poids de chaque cellules (appliquer la formule du poids) cot = cotangente
+    - Calcul des cellules (déjà codé)✅
+    - Calcul du poids de chaque arretes (appliquer la formule du poids) cot = cotangente✅
         ?Demander la différence entre le w_(i) et w_(i,j)
-    - Initialise la matrice de Rotation à une matrice Identité
+        ?w(i,j) -> poids par arrete
+        ?w(i) -> poids par cellule
+        !Supposition : poids d'une cellule c'est la somme des poids de ces arretes ?
+    - Initialise la matrice de Rotation à une matrice Identité✅
     - Méthode pour calculer la nouvelle matrice de rotation
         ---> Décomposition en valeur singulière de Si (voir formule (5))
         Sur les 3 matrices en sorties, on garde la première et la dernière

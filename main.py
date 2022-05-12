@@ -11,14 +11,17 @@ if __name__ == '__main__':
 
     Arap = ARAP(sommets, faces)
     Arap.genereCellules()
-    # Arap.calculPoidsCellules()
+    Arap.calculPoidsCellules()
     Arap.initMatriceRotation()
+
+    Arap.calculMatriceRotation(0)
+
     # print(Arap.matriceRotation)
     # print(Arap.sommets)
     # print(Arap.tabPoidsCellules)
     
-    test = Arap.chercheFaces(sommets[21], sommets[539])
-    print(test)
+    # test = Arap.chercheFaces(sommets[21], sommets[539])
+    # print(test)
     # ps.init()
     # ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=False)
     # ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
@@ -97,13 +100,13 @@ Récap des informations :
     - Calcul du poids de chaque arretes (appliquer la formule du poids) cot = cotangente✅
         ?Demander la différence entre le w_(i) et w_(i,j)
         ?w(i,j) -> poids par arrete
-        ?w(i) -> poids par cellule
+        ?w(i) -> poids par cellule --> fixer à 1
         !Supposition : poids d'une cellule c'est la somme des poids de ces arretes ?
     - Initialise la matrice de Rotation à une matrice Identité✅
     - Méthode pour calculer la nouvelle matrice de rotation
-        ---> Décomposition en valeur singulière de Si (voir formule (5))
-        Sur les 3 matrices en sorties, on garde la première et la dernière
-        a la fin du calcul -> determinant --> si négatif -> on inverse les valeurs de la colonne des Ui (regarder la colonne où on a la plus petite valeur dans la diagonale)
+        ---> Décomposition en valeur singulière de Si (voir formule (5))✅
+        Sur les 3 matrices en sorties, on garde la première et la dernière✅
+        a la fin du calcul -> determinant --> si négatif -> on inverse les valeurs de la colonne des Ui (regarder la colonne où on a la plus petite valeur dans la diagonale)✅
     - Méthode pour calculer les p'
         ---> Appliquer la formule de calcul sur chaque ligne (voir formule (8))
         Faire la formule (9) pour résoudre le tous

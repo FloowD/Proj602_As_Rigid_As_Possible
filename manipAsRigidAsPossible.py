@@ -68,8 +68,8 @@ class ARAP:
                 #On stocke le poids de l'arrete
                 self.tabPoidsAretesCellules[i].append(poidsArrete)
             
-            #On calcule le poids de la cellule
-            self.tabPoidsCellules[i] = sum(self.tabPoidsAretesCellules[i])
+            #On fixe le poids de la cellule à 1
+            self.tabPoidsCellules[i] = 1
         
 
                 
@@ -105,7 +105,7 @@ class ARAP:
     """
     def initMatriceRotation(self):
         #On initialise la matrice rotation
-        self.R = np.identity(len(self.sommets))
+        self.R = np.identity(len(self.tabCellules[0]))
 
     """
     Calcul la matrice de rotation pour une cellule (la ième cellule)
@@ -115,8 +115,24 @@ class ARAP:
         S = self.calculMatriceCovariance(i)
         #On fait la décomposition en valeur singuliere
         U, Sig, V = self.decompositionValeursSinguliere(S)
+
+        #On calcul la matrice de rotation
+        R = np.dot(V, U.T)
+
+        # On calcul de determinant de la matrice de rotation pour regarder si il est négatif
+        det = np.linalg.det(R)
+        if(det < 0):
+            # On trouve la valeur minimal de Sig
+            indiceMinDiag = np.argmin(np.diagonal(Sig))
+            # On inverse la colonne dans Ui correspondant à cette valeur minimal
+            U[:,indiceMinDiag] = -U[:,indiceMinDiag]
+            # On recalcul la matrice de rotation
+            R = np.dot(V, U.T)
+            # print(indiceMinDiag)
         
-        return np.dot(V,U.T)
+        print(R)
+        
+        return R
 
     """
     Applique la décomposition en valeurs singulière pour une matrice 
@@ -134,11 +150,12 @@ class ARAP:
         np.fill_diagonal(D, self.tabPoidsCellules)
 
         #On calcul P -> e_i,j
-        P = np.zeros((3, len(self.tabPoidsCellules[i])))
-        P_p = np.zeros((3, len(self.tabPoidsCellules[i])))
         cellule = self.tabCellules[i]
+        P = np.zeros((3, len(cellule)))
+        P_p = np.zeros((3, len(cellule)))
         for index, j in enumerate(cellule):
             e_ij = self.sommets[i] - self.sommets[j]
+            print(e_ij, self.R)
             e_ij_p = self.R*e_ij
             P[:,index] = e_ij
             P_p[:,index] = e_ij_p
@@ -147,4 +164,65 @@ class ARAP:
         MatriceCovariance = np.dot(P, np.dot(D, P_p.T))
 
         return MatriceCovariance
+
+    """
+    Calcul la vecteur b pour le calcul des p'
+    """
+    def trouver_b(self):
+        self.b = np.zeros((len(self.tabCellules), 1))
+        for index_i, i in enumerate(self.tabCellules):
+            for index_j, j in enumerate(i):
+                Ri = self.calculMatriceRotation(i)
+                Rj = self.calculMatriceRotation(j)
+                wij = self.tabPoidsAretesCellules[index_i][index_j]
+                pi = self.sommets[i]
+                pj = self.sommets[j]
+                self.b[index_i] += (wij/2)*(Ri + Rj) * (pi - pj)
+
+    """
+    Calcul les p'
+    """
+    #!On fait la version 'simple' pour tester
+    def trouverPPrime(self):
+        self.pPrime = np.zeros((len(self.sommets), 3))
+        #On va parcourrir la cellule
+        for index_i, i in enumerate(self.tabCellules):
+            ...
+
+
+    """
+    Calcul Laplacien
+    """
+    def calculLaplacien(self):
+        self.L = np.zeros((len(self.tabCellules), len(self.tabCellules)))
+        for index_i, i in enumerate(self.tabCellules):
+            somme_poids = 0
+            for index_j, j in enumerate(i):
+                somme_poids += self.tabPoidsAretesCellules[index_i][index_j]
+                self.L[index_i][index_j] = self.tabPoidsAretesCellules[index_i][index_j]
+            self.L[index_i, index_i] = -somme_poids
+
+        
+
+    def appliquerContraintesLaplacien(self, tabContraintes):
+        for indice_sommet_contraint in tabContraintes:
+            #On met toutes les valeurs de la ligne à 0
+            self.L[indice_sommet_contraint] = np.zeros((len(self.tabCellules), 1))
+            #On met 1 dans la diagonale
+            self.L[indice_sommet_contraint, indice_sommet_contraint] = 1
+            # p'j = ck
+            self.b[indice_sommet_contraint] = self.sommets[indice_sommet_contraint]
+            
+            #On met les valeurs dans la colonne de l'indice à 0
+            for index_i, i in enumerate(self.tabCellules):
+                if(indice_sommet_contraint in i):
+                    val = self.L[index_i][indice_sommet_contraint]
+                    self.L[index_i][indice_sommet_contraint] = 0
+                    #On met dans b la nouvelle valeur
+                    self.b[index_i] = self.b[index_i] - val*self.sommets[indice_sommet_contraint]
+                
+                
+
+
+
 

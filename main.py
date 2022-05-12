@@ -13,13 +13,14 @@ if __name__ == '__main__':
     Arap.genereCellules()
     # Arap.calculPoidsCellules()
     Arap.initMatriceRotation()
-    print(Arap.matriceRotation)
+    # print(Arap.matriceRotation)
     # print(Arap.sommets)
     # print(Arap.tabPoidsCellules)
-    # test = Arap.chercheFaces(sommets[21], sommets[539])
-    # print(test)
+    
+    test = Arap.chercheFaces(sommets[21], sommets[539])
+    print(test)
     # ps.init()
-    # ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=True)
+    # ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=False)
     # ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
     # ps.show()
 

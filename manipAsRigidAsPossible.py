@@ -79,17 +79,18 @@ class ARAP:
     """
     Fonction qui va retourner les 2 faces (triangle), qui contiennent les 2 points
     """
-    #TODO : a modifier ou supprimer pour trouver les bon sommets
     def chercheFaces(self, point1, point2):
         face_correcte = []
         # indicePoint1 = self.getIndiceSommet(point1)
         # indicePoint2 = self.getIndiceSommet(point2)
-        #On parcourt toutes les faces
-        for face in self.faces:
-            #On regarde si les 2 points sont dans la face courante
-            if(point1 in face and point2 in face):
-                #Si oui on ajoute le point qui n'est n'y indicePoint1 et indicesPoint2
-                face_correcte.append(face[face != point1][0])
+        #Sort les indices qu'on on trouve la valeur
+        tab = np.where( (point1 == self.faces) )[0]
+        for i in range(len(tab)):
+            if(point2 in self.faces[tab[i]]):
+                #On affiche la valeur qui n'est pas indicePoint1 et indicePoint2
+                face = self.faces[tab[i]]
+                face_correcte.append(face[(face != point1) & (face != point2)][0])
+
         return face_correcte
 
     """

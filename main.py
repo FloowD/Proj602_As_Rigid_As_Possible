@@ -6,26 +6,42 @@ import polyscope as ps
 
 if __name__ == '__main__':
     sommets, faces = openOffFile('./Data/armadillo_1k.off')
-    sommets2, faces2 = openOffFile('./Data/dino.off')
+    # sommets2, faces2 = openOffFile('./Data/dino.off')
     # print(sommets, faces)
 
     Arap = ARAP(sommets, faces)
     Arap.genereCellules()
     Arap.calculPoidsCellules()
     Arap.initMatriceRotation()
+    # Arap.initPPrime()
+    
+    # Arap.appliquerContraintesLaplacien([0,1,2,3,4])
+    for i in range(5):
+        if(i%2==0):
+            Arap.trouver_b()
+            Arap.calculLaplacien()
+            Arap.trouverPPrime()
+        else:
+            Arap.calculAllMatriceRotations()
 
-    Arap.calculMatriceRotation(0)
+    # Arap.calculMatriceRotation(0)
+
+    #?Main pour tester l'algo en entier
+    newSommets = Arap.pPrime
+
+
+
+    # print(Arap.pPrime)
+    # print(Arap.L)
 
     # print(Arap.matriceRotation)
     # print(Arap.sommets)
     # print(Arap.tabPoidsCellules)
     
-    # test = Arap.chercheFaces(sommets[21], sommets[539])
-    # print(test)
-    # ps.init()
-    # ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=False)
-    # ps.register_surface_mesh("my mesh2", sommets2, faces2, smooth_shade=True)
-    # ps.show()
+    ps.init()
+    ps.register_surface_mesh("my mesh", newSommets, faces, smooth_shade=False)
+    ps.register_surface_mesh("my mesh2", sommets, faces, smooth_shade=False)
+    ps.show()
 
 """
 Les questions qu'on se pose :

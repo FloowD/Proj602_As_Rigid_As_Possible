@@ -105,7 +105,14 @@ class ARAP:
     """
     def initMatriceRotation(self):
         #On initialise la matrice rotation
-        self.R = np.identity(len(self.tabCellules[0]))
+        self.tabMatriceRotation = [[] for i in range(len(self.tabCellules))]
+        for i in range (len(self.tabCellules)):
+            self.tabMatriceRotation[i] = np.identity(3)
+    """
+    Initialise le tableau des p'
+    """
+    def initPPrime(self):
+        ...
 
     """
     Calcul la matrice de rotation pour une cellule (la ième cellule)
@@ -115,6 +122,10 @@ class ARAP:
         S = self.calculMatriceCovariance(i)
         #On fait la décomposition en valeur singuliere
         U, Sig, V = self.decompositionValeursSinguliere(S)
+        # print("U=", U)
+        # print("Sig=", Sig)
+        # print("V=", V)
+        # print("U*Sig*V=", np.dot(np.dot(U,Sig),V))
 
         #On calcul la matrice de rotation
         R = np.dot(V, U.T)
@@ -123,14 +134,14 @@ class ARAP:
         det = np.linalg.det(R)
         if(det < 0):
             # On trouve la valeur minimal de Sig
-            indiceMinDiag = np.argmin(np.diagonal(Sig))
+            indiceMinDiag = np.argmin(Sig)
             # On inverse la colonne dans Ui correspondant à cette valeur minimal
             U[:,indiceMinDiag] = -U[:,indiceMinDiag]
             # On recalcul la matrice de rotation
             R = np.dot(V, U.T)
             # print(indiceMinDiag)
         
-        print(R)
+        # print(R)
         
         return R
 
@@ -146,8 +157,8 @@ class ARAP:
     """
     def calculMatriceCovariance(self, i):
         #On calcul D
-        D = np.zeros((len(self.tabPoidsCellules), len(self.tabPoidsCellules)))
-        np.fill_diagonal(D, self.tabPoidsCellules)
+        D = np.zeros((len(self.tabCellules[i]), len(self.tabCellules[i])))
+        np.fill_diagonal(D, self.tabCellules[i])
 
         #On calcul P -> e_i,j
         cellule = self.tabCellules[i]
@@ -155,8 +166,10 @@ class ARAP:
         P_p = np.zeros((3, len(cellule)))
         for index, j in enumerate(cellule):
             e_ij = self.sommets[i] - self.sommets[j]
-            print(e_ij, self.R)
-            e_ij_p = self.R*e_ij
+            # print("e_ij ", e_ij)
+            # print(e_ij.shape)
+            e_ij_p = self.pPrime[i] -  self.pPrime[j]
+            # print("e_ij_p", e_ij_p)
             P[:,index] = e_ij
             P_p[:,index] = e_ij_p
 
@@ -169,25 +182,25 @@ class ARAP:
     Calcul la vecteur b pour le calcul des p'
     """
     def trouver_b(self):
-        self.b = np.zeros((len(self.tabCellules), 1))
+        self.b = np.zeros((len(self.tabCellules), 3))
         for index_i, i in enumerate(self.tabCellules):
             for index_j, j in enumerate(i):
-                Ri = self.calculMatriceRotation(i)
-                Rj = self.calculMatriceRotation(j)
+                Ri = self.tabMatriceRotation[index_i]
+                Rj = self.tabMatriceRotation[j]
                 wij = self.tabPoidsAretesCellules[index_i][index_j]
-                pi = self.sommets[i]
+                pi = self.sommets[index_i]
                 pj = self.sommets[j]
-                self.b[index_i] += (wij/2)*(Ri + Rj) * (pi - pj)
+                # print("pi : ", pi)
+                # print("pj : ", pj)
+                # print("pi-pj : ", pi-pj)
+                self.b[index_i] = self.b[index_i] +  ((wij/2) * np.dot(Ri + Rj, pi - pj))
 
     """
     Calcul les p'
     """
     #!On fait la version 'simple' pour tester
     def trouverPPrime(self):
-        self.pPrime = np.zeros((len(self.sommets), 3))
-        #On va parcourrir la cellule
-        for index_i, i in enumerate(self.tabCellules):
-            ...
+        self.pPrime = np.linalg.solve(self.L, self.b)
 
 
     """
@@ -198,16 +211,21 @@ class ARAP:
         for index_i, i in enumerate(self.tabCellules):
             somme_poids = 0
             for index_j, j in enumerate(i):
+                #C BON
                 somme_poids += self.tabPoidsAretesCellules[index_i][index_j]
-                self.L[index_i][index_j] = self.tabPoidsAretesCellules[index_i][index_j]
+                self.L[index_i][j] = self.tabPoidsAretesCellules[index_i][index_j]
+            #C BON
             self.L[index_i, index_i] = -somme_poids
 
         
-
+    """
+    Applique les contraintes au Laplacien
+    On donnes des indices pour les contraintes
+    """
     def appliquerContraintesLaplacien(self, tabContraintes):
         for indice_sommet_contraint in tabContraintes:
             #On met toutes les valeurs de la ligne à 0
-            self.L[indice_sommet_contraint] = np.zeros((len(self.tabCellules), 1))
+            self.L[indice_sommet_contraint] = 0
             #On met 1 dans la diagonale
             self.L[indice_sommet_contraint, indice_sommet_contraint] = 1
             # p'j = ck
@@ -220,7 +238,10 @@ class ARAP:
                     self.L[index_i][indice_sommet_contraint] = 0
                     #On met dans b la nouvelle valeur
                     self.b[index_i] = self.b[index_i] - val*self.sommets[indice_sommet_contraint]
-                
+    
+    def calculAllMatriceRotations(self):
+        for i in range(len(self.tabCellules)):
+            self.tabMatriceRotation[i] = self.calculMatriceRotation(i)
                 
 
 

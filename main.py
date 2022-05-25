@@ -6,6 +6,7 @@ import polyscope as ps
 
 if __name__ == '__main__':
     sommets, faces = openOffFile('./Data/armadillo_1k.off')
+    # sommets, faces = openOffFile('./Data/cactus_small.off')
     # sommets2, faces2 = openOffFile('./Data/dino.off')
     # print(sommets, faces)
 
@@ -13,16 +14,17 @@ if __name__ == '__main__':
     Arap.genereCellules()
     Arap.calculPoidsCellules()
     Arap.initMatriceRotation()
-    # Arap.initPPrime()
+    Arap.initPPrime()
     
-    # Arap.appliquerContraintesLaplacien([0,1,2,3,4])
-    for i in range(5):
-        if(i%2==0):
-            Arap.trouver_b()
-            Arap.calculLaplacien()
-            Arap.trouverPPrime()
-        else:
-            Arap.calculAllMatriceRotations()
+    # Arap.calculLaplacien()
+    # Arap.trouver_b()
+    # Arap.appliquerContraintesLaplacien([200,201,202])
+    # Arap.appliquerContraintesLaplacien(range(1,5))
+    Arap.appliquerContraintesLaplacien([200,201,202])
+    for i in range(60):
+        Arap.trouver_b()
+        Arap.trouverPPrime()
+        Arap.calculAllMatriceRotations()
 
     # Arap.calculMatriceRotation(0)
 
@@ -130,5 +132,7 @@ Récap des informations :
 
     On doit faire le tous (calcul rotation et p') tant que l'énergie minimal n'est pas atteinte (formule (7))
 
+
+calcul des p' global -> tous d'un coup en une seule grosse matrice
 
 """

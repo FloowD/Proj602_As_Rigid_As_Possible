@@ -1,5 +1,6 @@
 import numpy as np
 from Edge import *
+from scipy.sparse import csgraph
 class ARAP:
     """
     Init pour avoir sommets et faces constaments
@@ -7,6 +8,7 @@ class ARAP:
     def __init__(self, sommets, faces):
         self.sommets = sommets
         self.faces = faces
+        self.nb_sommets = len(self.sommets)
 
     """
     Transforme nos tableaux de sommets et faces en cellules
@@ -112,7 +114,8 @@ class ARAP:
     Initialise le tableau des p'
     """
     def initPPrime(self):
-        ...
+        self.pPrime = np.array(self.sommets)
+        self.pPrime = np.asmatrix(self.pPrime)
 
     """
     Calcul la matrice de rotation pour une cellule (la ième cellule)
@@ -128,7 +131,8 @@ class ARAP:
         # print("U*Sig*V=", np.dot(np.dot(U,Sig),V))
 
         #On calcul la matrice de rotation
-        R = np.dot(V, U.T)
+        # R = np.dot(V, U.T)
+        R = V.T.dot(U.T)
 
         # On calcul de determinant de la matrice de rotation pour regarder si il est négatif
         det = np.linalg.det(R)
@@ -138,7 +142,8 @@ class ARAP:
             # On inverse la colonne dans Ui correspondant à cette valeur minimal
             U[:,indiceMinDiag] = -U[:,indiceMinDiag]
             # On recalcul la matrice de rotation
-            R = np.dot(V, U.T)
+            # R = np.dot(V, U.T)
+            R = V.T.dot(U.T)
             # print(indiceMinDiag)
         
         # print(R)
@@ -158,7 +163,8 @@ class ARAP:
     def calculMatriceCovariance(self, i):
         #On calcul D
         D = np.zeros((len(self.tabCellules[i]), len(self.tabCellules[i])))
-        np.fill_diagonal(D, self.tabCellules[i])
+        # np.fill_diagonal(D, self.tabCellules[i])
+        np.fill_diagonal(D, self.tabPoidsCellules[i])
 
         #On calcul P -> e_i,j
         cellule = self.tabCellules[i]
@@ -174,7 +180,8 @@ class ARAP:
             P_p[:,index] = e_ij_p
 
         #On calcul la matrice de covariance
-        MatriceCovariance = np.dot(P, np.dot(D, P_p.T))
+        # MatriceCovariance = np.dot(P, np.dot(D, P_p.T))
+        MatriceCovariance = P.dot(D).dot(P_p.T)
 
         return MatriceCovariance
 
@@ -193,14 +200,15 @@ class ARAP:
                 # print("pi : ", pi)
                 # print("pj : ", pj)
                 # print("pi-pj : ", pi-pj)
-                self.b[index_i] = self.b[index_i] +  ((wij/2) * np.dot(Ri + Rj, pi - pj))
+                # self.b[index_i] = self.b[index_i] +  ((wij/2) * np.dot(Ri + Rj, pi - pj))
+                self.b[index_i] = self.b[index_i] +  ((wij/2) * (pi - pj).dot(Ri + Rj))
 
     """
     Calcul les p'
     """
     #!On fait la version 'simple' pour tester
     def trouverPPrime(self):
-        self.pPrime = np.linalg.solve(self.L, self.b)
+        self.pPrime = np.linalg.solve(self.L, self.b)[:len(self.sommets)]
 
 
     """
@@ -222,7 +230,7 @@ class ARAP:
     Applique les contraintes au Laplacien
     On donnes des indices pour les contraintes
     """
-    def appliquerContraintesLaplacien(self, tabContraintes):
+    def appliquerContraintesLaplacien(self, tabContraintes, tabModifier):
         for indice_sommet_contraint in tabContraintes:
             #On met toutes les valeurs de la ligne à 0
             self.L[indice_sommet_contraint] = 0
@@ -238,6 +246,27 @@ class ARAP:
                     self.L[index_i][indice_sommet_contraint] = 0
                     #On met dans b la nouvelle valeur
                     self.b[index_i] = self.b[index_i] - val*self.sommets[indice_sommet_contraint]
+    
+
+
+
+
+    """
+    V2 de l'application des contraintes avec la taille des éléments déformé en plus
+    """
+    def appliquerContraintesLaplacienV2(self, tabContraintes):
+        nb_deform = len(tabContraintes)
+        self.L = np.zeros((self.nb_sommets+nb_deform, self.nb_sommets+nb_deform))
+        self.L[:self.nb_sommets, :self.nb_sommets] = csgraph.laplacian(self.tabPoidsCellules)
+        for i in range(nb_deform):
+            newi = i + len(self.sommets)
+            self.L[newi, tabContraintes[i]] = 1
+            self.L[tabContraintes[i], newi] = 1
+
+        self.b = np.zeros((self.nb_sommets+nb_deform, 3))
+        for i in range(nb_deform):
+            self.b[self.nb_sommets + i] = self.tabCellules[i]
+    
     
     def calculAllMatriceRotations(self):
         for i in range(len(self.tabCellules)):

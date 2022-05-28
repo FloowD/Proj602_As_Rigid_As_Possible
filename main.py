@@ -2,6 +2,7 @@
 import numpy as np
 from manipModel3D import *
 from manipAsRigidAsPossible import *
+from manipV2 import *
 import polyscope as ps
 
 if __name__ == '__main__':
@@ -11,25 +12,26 @@ if __name__ == '__main__':
     # print(sommets, faces)
 
     Arap = ARAP(sommets, faces)
-    Arap.genereCellules()
-    Arap.calculPoidsCellules()
-    Arap.initMatriceRotation()
-    Arap.initPPrime()
+    Arap2 = ARAP2(sommets, faces)
+    # Arap.genereCellules()
+    # Arap.calculPoidsCellules()
+    # Arap.initMatriceRotation()
+    # Arap.initPPrime()
     
     # Arap.calculLaplacien()
     # Arap.trouver_b()
     # Arap.appliquerContraintesLaplacien([200,201,202])
     # Arap.appliquerContraintesLaplacien(range(1,5))
-    Arap.appliquerContraintesLaplacien([200,201,202])
-    for i in range(60):
-        Arap.trouver_b()
-        Arap.trouverPPrime()
-        Arap.calculAllMatriceRotations()
+    # Arap.appliquerContraintesLaplacien([200,201,202])
+    # for i in range(60):
+    #     Arap.trouver_b()
+    #     Arap.trouverPPrime()
+    #     Arap.calculAllMatriceRotations()
 
     # Arap.calculMatriceRotation(0)
 
     #?Main pour tester l'algo en entier
-    newSommets = Arap.pPrime
+    # newSommets = Arap.pPrime
 
 
 
@@ -40,10 +42,10 @@ if __name__ == '__main__':
     # print(Arap.sommets)
     # print(Arap.tabPoidsCellules)
     
-    ps.init()
-    ps.register_surface_mesh("my mesh", newSommets, faces, smooth_shade=False)
-    ps.register_surface_mesh("my mesh2", sommets, faces, smooth_shade=False)
-    ps.show()
+    # ps.init()
+    # ps.register_surface_mesh("my mesh", newSommets, faces, smooth_shade=False)
+    # ps.register_surface_mesh("my mesh2", sommets, faces, smooth_shade=False)
+    # ps.show()
 
 """
 Les questions qu'on se pose :

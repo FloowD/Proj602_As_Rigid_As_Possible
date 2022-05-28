@@ -11,8 +11,19 @@ if __name__ == '__main__':
     # sommets2, faces2 = openOffFile('./Data/dino.off')
     # print(sommets, faces)
 
-    Arap = ARAP(sommets, faces)
+    # Arap = ARAP(sommets, faces)
     Arap2 = ARAP2(sommets, faces)
+
+    Arap2.appliquer_contrainte([], range(200,203), np.stack([np.random.rand(4,4)]*3))
+    Arap2.lalgotourne(100)
+
+    ps.init()
+    ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=False)
+    ps.register_surface_mesh("my mesh2", Arap2.sommetsPPrime, faces, smooth_shade=False)
+    ps.show()
+
+
+
     # Arap.genereCellules()
     # Arap.calculPoidsCellules()
     # Arap.initMatriceRotation()

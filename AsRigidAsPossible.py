@@ -13,8 +13,6 @@ class ARAP:
         self.sommetsPPrime = np.array(self.sommets)
         self.sommetsPPrime = np.asmatrix(self.sommetsPPrime)
 
-        self.vertex2Tri = [[j for j,tri in enumerate(self.faces) if i in tri] for i in range(self.nbSommets)]
-
         #On crée une matrice qui va stocker les voisins de chaque sommets
         self.voisins = np.zeros((self.nbSommets,self.nbSommets))
 

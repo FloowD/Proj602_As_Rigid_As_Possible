@@ -74,9 +74,6 @@ class ARAP:
             self.tabPoidsCellules[i] = 1
         
 
-                
-                
-    
     
     """
     Fonction qui va retourner les 2 faces (triangle), qui contiennent les 2 points

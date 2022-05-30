@@ -2,10 +2,8 @@ import numpy as np
 from Edge import *
 from scipy.sparse import csgraph
 import itertools
-import math
-# from mpmath import cot
 
-class ARAP2:
+class ARAP:
     def __init__(self, sommets, faces):
         self.sommets = sommets
         self.faces = faces
@@ -14,10 +12,8 @@ class ARAP2:
         #On transforme en matrice et liste numpy pour la manipulation
         self.sommetsPPrime = np.array(self.sommets)
         self.sommetsPPrime = np.asmatrix(self.sommetsPPrime)
-        # print("sommetsPPrime DEBUT: ", self.sommetsPPrime)
 
         self.vertex2Tri = [[j for j,tri in enumerate(self.faces) if i in tri] for i in range(self.nbSommets)]
-        # print(self.sommets2Tri)
 
         #On crée une matrice qui va stocker les voisins de chaque sommets
         self.voisins = np.zeros((self.nbSommets,self.nbSommets))
@@ -42,44 +38,28 @@ class ARAP2:
             for voisin in voisins:
                 #On initialise le poids pour chaque voisin du sommet
                 self.initPoids(sommet, voisin)
-
+    """
+    Trouve les sommets voisins d'un sommet choisi
+    """
     def trouverVoisins(self, sommet):
         return np.where(self.voisins[sommet]==1)[0]
-
+    """
+    Initialise le poids pour chaque arrête
+    """
     def initPoids(self, sommet_i, sommet_j):
         if(self.poids[sommet_i, sommet_j] == 0):
-            # pointAlpha, pointBeta = self.chercheAlphaBeta(sommet_i,sommet_j)
-            # edge = Edge(self.sommets[sommet_i], self.sommets[sommet_j])
-            # poids = edge.calculPoidsArrete(self.sommets[pointAlpha], self.sommets[pointBeta])
-            poids = self.calWeight(sommet_i, sommet_j)
+            pointAlpha, pointBeta = self.chercheAlphaBeta(sommet_i,sommet_j)
+            edge = Edge(self.sommets[sommet_i], self.sommets[sommet_j])
+            poids = edge.calculPoidsArrete(self.sommets[pointAlpha], self.sommets[pointBeta])
         
         else:
             poids = self.poids[sommet_i, sommet_j]
         self.poids[sommet_i, sommet_j] = poids
 
-    def calWeight(self, verti,vertj):
-            #On définit un tableau de points
-            external_points=[]
-            for tri in self.vertex2Tri[verti]:
-                triVert = self.faces[tri]
-                if verti in triVert and vertj in triVert:
-                    for Vertid in triVert:
-                        if Vertid != verti and Vertid !=vertj:
-                            external_points.append(Vertid)
-            posi = np.array(self.sommets[verti])
-            posj = np.array(self.sommets[vertj])
-            cot_weight = 0
-            for other_point in external_points:
-                other_pos = np.array(self.sommets[other_point])
-                vA = posi - other_pos
-                vB = posj - other_pos
-                Cos_value = np.dot(vA,vB)/(np.linalg.norm(vA)*np.linalg.norm(vB))
-                theta = math.acos(Cos_value)
-                cot_weight += math.cos(theta)/math.sin(theta)
-            return cot_weight*0.5
 
-
-    
+    """ 
+    Trouve les points apartenant aux triangles n'étant pas les point1 et point2
+    """ 
     def chercheAlphaBeta(self, point1, point2):
         alphaBeta = []
         #Sort les indices qu'on on trouve la valeur
@@ -92,7 +72,9 @@ class ARAP2:
 
         return alphaBeta
 
-
+    """
+    Calcule la matrice P utilisé dans le calcul de la matrice de covariance
+    """
     def calcul_P_pour_covariance(self):
         self.tab_P = []
         for sommet_i in range(self.nbSommets):
@@ -105,6 +87,9 @@ class ARAP2:
                 P_i[:, vi] = pos_sommet_i - pos_voisin
             self.tab_P.append(P_i)
 
+    """
+    On applique les contraintes au modèle
+    """
     def appliquer_contrainte(self, idFixe, idDeplace, matriceDeformation):
         # On utilise la matrice de déformation pour simuler un mouvement
         liste_matrice_deform = list(map(np.matrix, matriceDeformation))
@@ -116,7 +101,6 @@ class ARAP2:
                 self.listeSommetDeforme.append((indice_sommet, self.sommets[indice_sommet]))
 
             elif(indice_sommet in idDeplace):
-                #TODO : tester avec une matrice 3x3 (en enlevant le 1 en plus ...)
                 sommetDeform = np.append(self.sommets[indice_sommet], 1)
                 sommetDeform = sommetDeform.dot(liste_matrice_deform[idDeplace.index(indice_sommet)])
                 sommetDeform = np.delete(sommetDeform, 3).flatten()
@@ -126,7 +110,6 @@ class ARAP2:
         nbSommetDeform = len(self.listeSommetDeforme)
 
         self.laplacienne = np.zeros((self.nbSommets + nbSommetDeform, self.nbSommets + nbSommetDeform), dtype=np.float32)
-
         # La matrice poids est une matrice d'adjacence pondéré
         # On la convertit en matrice laplacienne
         self.laplacienne[:self.nbSommets, :self.nbSommets] = csgraph.laplacian(self.poids)
@@ -143,16 +126,25 @@ class ARAP2:
 
         self.calcul_P_pour_covariance()
 
+    """
+    Fonction qui applique l'algorithme (calcul des rotations et calcul des p prime)
+    """
     def lalgotourne(self, nbIterations):
         for i in range(nbIterations):
             self.calculRotations()
             self.calculPPrime()
-
+    
+    """
+    Calcule toutes les matrices de rotations
+    """
     def calculRotations(self):
         for sommet in range(self.nbSommets):
             matriceRotation = self.calculMatriceRotation(sommet)
             self.rotations[sommet] = matriceRotation
 
+    """
+    Calcule la matrice de rotation pour un sommet
+    """
     def calculMatriceRotation(self, sommet):
         #On calcul la matrice de covariance
         S = self.calculMatriceCovariance(sommet)
@@ -176,7 +168,6 @@ class ARAP2:
     """
     def calculMatriceCovariance(self, sommet_i):
         sommetPPrime = self.sommetsPPrime[sommet_i]
-        # print("sommetPPrime = ",sommetPPrime)
         voisins = self.trouverVoisins(sommet_i)
         nbVoisins = len(voisins)
 
@@ -195,10 +186,16 @@ class ARAP2:
         MatriceCovariance = P.dot(D).dot(P_prime.T)
 
         return MatriceCovariance
-        
+
+    """
+    Applique la décomposition en valeurs singulières
+    """
     def decompositionValeursSinguliere(self, S):
         return np.linalg.svd(S)
     
+    """
+    Calcule les nouveaux sommets après rotation
+    """
     def calculPPrime(self):
         for sommet in range(self.nbSommets):
             self.b[sommet] = np.zeros((1, 3))
@@ -208,5 +205,4 @@ class ARAP2:
                 r = self.rotations[sommet] + self.rotations[voisin]
                 p = np.array(self.sommets[sommet]) - np.array(self.sommets[voisin])
                 self.b[sommet] += (w * r.dot(p))
-        # print("b = ",self.b)
         self.sommetsPPrime = np.linalg.solve(self.laplacienne, self.b)[:self.nbSommets]

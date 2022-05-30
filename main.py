@@ -1,62 +1,33 @@
 #! /usr/bin/python
 import numpy as np
 from manipModel3D import *
-from manipAsRigidAsPossible import *
-from manipV2 import *
+from AsRigidAsPossible import *
 import polyscope as ps
 
 if __name__ == '__main__':
-    sommets, faces = openOffFile('./Data/armadillo_1k.off')
-    # sommets, faces = openOffFile('./Data/cactus_small.off')
-    # sommets2, faces2 = openOffFile('./Data/dino.off')
-    # print(sommets, faces)
+    structure = 'armadillo_1k'
+    # structure = 'cactus_small'
+    # structure = 'cactus_large'
+    # structure = 'dino'
 
-    # Arap = ARAP(sommets, faces)
-    Arap2 = ARAP2(sommets, faces)
-
-    Arap2.appliquer_contrainte([], range(200,203), np.stack([np.random.rand(4,4)]*3))
-    Arap2.lalgotourne(100)
-
+    # On récupère les données de la structure
+    sommets, faces = openOffFile('./Data/'+structure+'.off')
+    
+    # On initialise la déformation as rigid as possible (on trouve les cellules/voisins, on initialise les poids, etc.)
+    Arap = ARAP(sommets, faces)
+    #On applique des contraintes sur le modèle
+    Arap.appliquer_contrainte([], range(200,203), np.stack([np.random.rand(4,4)]*3))
+    #On applique l'algorithme avec un nombre d'itérations fixé
+    Arap.lalgotourne(100)
+    #On sauvegarde le résultat
+    saveOffFile(Arap.sommetsPPrime, faces, './Data/deformed_' + structure + '.off')
+    #On affiche les 2 modèles avec polyscope
     ps.init()
     ps.register_surface_mesh("my mesh", sommets, faces, smooth_shade=False)
-    ps.register_surface_mesh("my mesh2", Arap2.sommetsPPrime, faces, smooth_shade=False)
+    ps.register_surface_mesh("my mesh deformed", Arap.sommetsPPrime, faces, smooth_shade=False)
     ps.show()
 
 
-
-    # Arap.genereCellules()
-    # Arap.calculPoidsCellules()
-    # Arap.initMatriceRotation()
-    # Arap.initPPrime()
-    
-    # Arap.calculLaplacien()
-    # Arap.trouver_b()
-    # Arap.appliquerContraintesLaplacien([200,201,202])
-    # Arap.appliquerContraintesLaplacien(range(1,5))
-    # Arap.appliquerContraintesLaplacien([200,201,202])
-    # for i in range(60):
-    #     Arap.trouver_b()
-    #     Arap.trouverPPrime()
-    #     Arap.calculAllMatriceRotations()
-
-    # Arap.calculMatriceRotation(0)
-
-    #?Main pour tester l'algo en entier
-    # newSommets = Arap.pPrime
-
-
-
-    # print(Arap.pPrime)
-    # print(Arap.L)
-
-    # print(Arap.matriceRotation)
-    # print(Arap.sommets)
-    # print(Arap.tabPoidsCellules)
-    
-    # ps.init()
-    # ps.register_surface_mesh("my mesh", newSommets, faces, smooth_shade=False)
-    # ps.register_surface_mesh("my mesh2", sommets, faces, smooth_shade=False)
-    # ps.show()
 
 """
 Les questions qu'on se pose :

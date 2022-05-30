@@ -18,8 +18,6 @@ def openOffFile(path):
     nbFaces = int(firstLigne[1])
     
     #On crée une matrice de taille : nombre de faces, 3 colonnes
-    # TODO : On pourrait améliorer ce truc, en ne forcant pas 3 colonnes mais en le récupérant
-    #?Demander si c'est utile
     sommets = np.zeros((nbSommet, 3))
     #On va parcourir les premières lignes du fichiers qui correspondent aux coordonnées des sommets
     faces = np.zeros((nbFaces, 3), dtype=np.int)
@@ -39,3 +37,31 @@ def openOffFile(path):
 
     return sommets, faces
     
+
+def saveOffFile(sommets, faces, path):
+    nouveauFichierOff = open(path, "w")
+    # On écrit le : OFF au debut du fichier
+    nouveauFichierOff.write('OFF\n')
+
+    # On écrit le nombre de sommets et de faces
+    l = []
+    l.append(str(len(sommets)))
+    l.append(str(len(faces)))
+    l.append(str(0))
+    nouveauFichierOff.write(' '.join(l)+'\n')
+
+    # On écrit les sommets (les coordonnées)
+    for sommet in sommets:
+        l = []
+        l.append(str(sommet[0]))
+        l.append(str(sommet[1]))
+        l.append(str(sommet[2]))
+        nouveauFichierOff.write(' '.join(l)+'\n')
+
+    # On écrit les faces (les indices des sommets)
+    for face in faces:
+        l = [str(3)]
+        l.append(str(face[0]))
+        l.append(str(face[1]))
+        l.append(str(face[2]))
+        nouveauFichierOff.write(' '.join(l)+'\n')

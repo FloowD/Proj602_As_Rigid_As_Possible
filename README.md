@@ -62,16 +62,25 @@ dans un terminal à la racine du projet
 ---
 ## Illustrations
 
-Voici un exemple avec un tatou en 3d
+**Voici un exemple avec un tatou en 3d**
 
 <img src="./Data/img/armadillo1.png" alt="Tatou en 3D" height="480"/>
-<img src="./Data/img/armadillo2.png" alt="Tatou modifie en 3D" height="480"/>
+<img src="./Data/img/armadillo3.png" alt="Tatou modifie en 3D" height="480"/>
 
 
-Un exemple avec une bar en 3d
+**Un exemple avec une bar en 3d**
 
-<img src="./Data/img/bar1.png" alt="Dino en 3D" height="480"/>
-<img src="./Data/img/bar2.png" alt="Dino modifie en 3D" height="480"/>
+<img src="./Data/img/bar1.png" alt="bar en 3D" height="480"/>
+<img src="./Data/img/bar2.png" alt="bar modifie en 3D" height="480"/>
+
+**Voici la bar avec un des sommets fixés**
+
+<img src="./Data/img/bar3.png" alt="Double bar en 3D" height="480"/>
+
+**Un exemple avec un cactus**
+
+<img src="./Data/img/cactus1.png" alt="Cactus en 3D" height="480"/>
+<img src="./Data/img/cactus2.png" alt="cactus modifie en 3D" height="480"/>
 
 ---
 ## Différents paramètres

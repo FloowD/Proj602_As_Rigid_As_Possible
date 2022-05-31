@@ -8,8 +8,8 @@ if __name__ == '__main__':
 
     # MODIFIER ICI POUR LE CHOIX DU FICHIER .off
     # structure = 'armadillo_1k'
-    # structure = 'bar1'
-    structure = 'cactus_small'
+    structure = 'bar1'
+    # structure = 'cactus_small'
     # structure = 'cactus_highres'
 
     # On récupère les données de la structure
@@ -21,11 +21,11 @@ if __name__ == '__main__':
     # MODIFIER ICI POUR LE CHOIX DES POINTS FIXES ET DEPLACES
     # On applique des contraintes sur le modèle
     # Démo tatou pour le fichier 'armadillo_1k' :
-    Arap.appliquer_contrainte([], range(200,203), np.stack([np.random.rand(4,4)]*3))
+    # Arap.appliquer_contrainte([], [403,809, 239,909], np.stack([np.random.rand(4,4)]*4))
     # Démo pour le fichier 'bar1.off'
-    #Arap.appliquer_contrainte([], range(90,93), np.stack([np.random.rand(4,4)]*3))
+    Arap.appliquer_contrainte([0], [55], np.stack([np.random.rand(4,4)]*1))
     # Démo pour le fichier 'cactus_small.off'
-    # Arap.appliquer_contrainte([],range(177, 180), np.stack([np.random.rand(4,4)]*3))
+    # Arap.appliquer_contrainte([],[504, 597, 591, 356], np.stack([np.random.rand(4,4)]*4))
     
     # On applique l'algorithme avec un nombre d'itérations fixé
     Arap.lalgotourne(100)
